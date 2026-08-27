@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RADAR/// Fabiola Alanís · Michoacán · Dashboard v3</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{
+  --navy:#1C2738;
+  --card:#d5d1d1;
+  --border:#b0b0b0;
+  --teal:#00838f;
+  --green:#1E8449;
+  --amber:#C49A00;
+  --red:#C0392B;
+  --orange:#D35400;
+  --neutral:#555555;
+}
+*{box-sizing:border-box;}
+body{
+  margin:0;
+  background:#ffffff;
+  color:#1c1c1c;
+  font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+}
+header{
+  position:sticky;
+  top:0;
+  z-index:50;
+  background:var(--navy);
+  color:#ffffff;
+  border-bottom:1px solid var(--border);
+}
+.headwrap{
+  max-width:1320px;
+  margin:0 auto;
+  padding:14px 20px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:10px;
+}
+.logo{
+  font-family:'Courier New',monospace;
+  font-weight:800;
+  color:#ffffff;
+  font-size:20px;
+  letter-spacing:1px;
+}
+.logo span{
+  color:#b0c4de;
+  font-size:12px;
+  font-weight:400;
+  margin-left:8px;
+}
+.meta{
+  display:flex;
+  align-items:center;
+  gap:14px;
+  flex-wrap:wrap;
+}
+.alert-badge{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  background:rgba(255,255,255,0.15);
+  border:1px solid #ffffff;
+  padding:6px 14px;
+  border-radius:20px;
+  font-size:13px;
+  font-weight:600;
+  color:#ffffff;
+}
+.pulse{
+  width:10px;
+  height:10px;
+  border-radius:50%;
+  background:#f1c40f;
+  animation:pulse 1.6s infinite;
+}
+@keyframes pulse{
+  0%{box-shadow:0 0 0 0 rgba(241,196,15,0.6);}
+  70%{box-shadow:0 0 0 8px rgba(241,196,15,0);}
+  100%{box-shadow:0 0 0 0 rgba(241,196,15,0);}
+}
+.subtle{
+  color:#d0d7de;
+  font-size:12px;
+}
+nav{
+  max-width:1320px;
+  margin:0 auto;
+  padding:0 20px;
+  display:flex;
+  gap:4px;
+  overflow-x:auto;
+  background:var(--navy);
+  border-top:1px solid rgba(255,255,255,0.1);
+}
+nav button{
+  background:none;
+  border:none;
+  color:#d0d7de;
+  padding:12px 14px;
+  font-size:13px;
+  cursor:pointer;
+  white-space:nowrap;
+  border-bottom:3px solid transparent;
+  font-family:monospace;
+}
+nav button.active{
+  color:#ffffff;
+  font-weight:bold;
+  border-bottom:3px solid #ffffff;
+}
+main{
+  max-width:1320px;
+  margin:0 auto;
+  padding:24px 20px 80px;
+}
+.tab{display:none;}
+.tab.active{
+  display:block;
+  animation:fade .25s ease;
+}
+@keyframes fade{
+  from{opacity:0;transform:translateY(4px);}
+  to{opacity:1;transform:translateY(0);}
+}
+h2.sec{
+  font-size:20px;
+  margin:0 0 6px;
+  color:var(--navy);
+}
+p.lead{
+  color:#444444;
+  font-size:13.5px;
+  margin:0 0 20px;
+  max-width:920px;
+}
+.grid{display:grid;gap:14px;}
+.g4{grid-template-columns:repeat(4,1fr);}
+.g3{grid-template-columns:repeat(3,1fr);}
+.g2{grid-template-columns:repeat(2,1fr);}
+@media(max-width:900px){
+  .g4{grid-template-columns:repeat(2,1fr);}
+  .g3{grid-template-columns:1fr 1fr;}
+  .g2{grid-template-columns:1fr;}
+}
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:16px;
+  color:#1c1c1c;
+}
+.kpi .label{
+  font-size:11px;
+  text-transform:uppercase;
+  letter-spacing:.06em;
+  color:#333333;
+  margin-bottom:6px;
+  font-weight:600;
+}
+.kpi .val{
+  font-size:26px;
+  font-weight:800;
+  color:#1c1c1c;
+}
+.kpi .sub{
+  font-size:11.5px;
+  color:#444444;
+  margin-top:4px;
+}
+.tag{
+  display:inline-block;
+  font-size:10.5px;
+  padding:2px 8px;
+  border-radius:10px;
+  font-weight:700;
+  margin-right:6px;
+}
+.tag.g{background:rgba(30,132,73,0.2);color:#145a32;}
+.tag.a{background:rgba(196,154,0,0.2);color:#7d6608;}
+.tag.r{background:rgba(192,57,43,0.2);color:#78281f;}
+.tag.n{background:rgba(143,163,177,0.3);color:#2c3e50;}
+table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:12.5px;
+}
+th{
+  text-align:left;
+  background:var(--navy);
+  color:#ffffff;
+  padding:8px 10px;
+  font-weight:600;
+  position:sticky;
+  top:0;
+}
+td{
+  padding:8px 10px;
+  border-bottom:1px solid #b0b0b0;
+  color:#1c1c1c;
+}
+tr:hover td{background:rgba(0,0,0,0.04);}
+.badge-actor{
+  display:inline-block;
+  padding:2px 8px;
+  border-radius:6px;
+  font-size:11px;
+  font-weight:700;
+}
+.b-alanis{background:#00838f;color:#ffffff;}
+.b-moron{background:#C0392B;color:#ffffff;}
+.b-torres{background:#D35400;color:#ffffff;}
+.b-butanda{background:#1E8449;color:#ffffff;}
+.b-quiroz{background:#616161;color:#ffffff;}
+.chart-box{position:relative;height:280px;}
+.chart-box.sm{height:220px;}
+.chart-box.lg{height:340px;}
+.pill-row{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin-bottom:14px;
+  align-items:center;
+}
+.pill-row .lbl{
+  font-size:11.5px;
+  color:#333333;
+  text-transform:uppercase;
+  letter-spacing:.05em;
+  margin-right:4px;
+  font-weight:bold;
+}
+.pill{
+  background:#ffffff;
+  border:1px solid var(--border);
+  border-radius:20px;
+  padding:5px 12px;
+  font-size:12px;
+  cursor:pointer;
+  color:#1c1c1c;
+}
+.pill.on{
+  background:var(--navy);
+  color:#ffffff;
+  border-color:var(--navy);
+  font-weight:700;
+}
+.pill.alt.on{
+  background:#00838f;
+  color:#ffffff;
+  border-color:#00838f;
+}
+.wordcloud{
+  text-align:center;
+  padding:20px;
+  line-height:1.9;
+  background:var(--card);
+  border-radius:10px;
+}
+.wordcloud span{display:inline-block;margin:3px 8px;}
+.risk-col h4{margin:0 0 10px;font-size:14px;color:var(--navy);}
+.risk-item{
+  border-left:4px solid var(--red);
+  background:#ffffff;
+  padding:10px 12px;
+  border-radius:6px;
+  margin-bottom:10px;
+  box-shadow:0 1px 3px rgba(0,0,0,0.1);
+}
+.risk-item.opp{border-left-color:var(--green);}
+.risk-item .lvl{font-size:10px;font-weight:800;letter-spacing:.05em;}
+.risk-item .biv{color:#555555;font-size:11.5px;margin-top:6px;font-style:italic;}
+.note{
+  font-size:11.5px;
+  color:#444444;
+  font-style:italic;
+  margin-top:10px;
+}
+.divider{
+  height:1px;
+  background:var(--border);
+  margin:26px 0;
+}
+.actor-alert{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-size:12px;
+  font-weight:700;
+  padding:4px 10px;
+  border-radius:14px;
+  width:fit-content;
+}
+.al-1{background:rgba(30,132,73,0.2);color:#145a32;}
+.al-2{background:rgba(196,154,0,0.25);color:#7d6608;}
+.al-3{background:rgba(211,84,0,0.25);color:#7e3500;}
+.al-4{background:rgba(192,57,43,0.25);color:#78281f;}
+.footer{background:#1C2738;border-top:1px solid rgba(255,255,255,.1);padding:14px 24px;font-size:11px;color:#94A3B8;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-top:40px;border-radius:0 0 8px 8px}
+
+</style>
+</head>
+<body>
+
+<header>
+  <div class="headwrap">
+    <div>
+      <span class="logo">RADAR///<span>v3.0</span></span>
+    </div>
+    <div class="meta">
+      <div class="alert-badge"><span class="pulse"></span> NIVEL 2 · ALERTA AMARILLA — Fabiola Alanís</div>
+      <div class="subtle">Corte: 26 ago 2026 · Periodo: 17–26 ago 2026 (10 días)</div>
+    </div>
+  </div>
+  <nav id="tabnav"></nav>
+</header>
+
+<main id="main"></main>
+
+<div class="footer">
+  <span id="em-ftr-l">RADAR · Comparativo: Alanís · Morón · Torres Piña · Butanda · Proceso interno MORENA Michoacán 2027 ·</span>
+  <span>CONFIDENCIAL &middot; Uso estratégico exclusivo</span>
+</div>
+</div>
+<script>
+Chart.defaults.color = '#1c1c1c';
+Chart.defaults.borderColor = '#b0b0b0';
+
+const ACTORS = ["Alanís","Morón","Torres Piña","Butanda"];
+const ACTOR_COLORS = {"Alanís":"#00838f","Morón":"#C0392B","Torres Piña":"#D35400","Butanda":"#1E8449"};
+
+const TABS = [
+ {id:"kpis",label:"KPIs Ampliados"},
+ {id:"sentimiento",label:"Sentimiento"},
+ {id:"topofmind",label:"Top of Mind"},
+ {id:"picos",label:"Picos"},
+ {id:"plataformas",label:"Plataformas"},
+ {id:"nube",label:"Nube y Hashtags"},
+ {id:"narrativas",label:"Narrativas"},
+ {id:"riesgos",label:"Riesgos y Oportunidades"},
+ {id:"territorial",label:"Territorial"}
+];
+
+const nav = document.getElementById('tabnav');
+TABS.forEach((t,i)=>{
+  const b = document.createElement('button');
+  b.textContent = t.label; b.dataset.tab = t.id;
+  if(i===0) b.classList.add('active');
+  b.onclick = ()=>showTab(t.id);
+  nav.appendChild(b);
+});
+
+function showTab(id){
+  document.querySelectorAll('#tabnav button').forEach(b=>b.classList.toggle('active', b.dataset.tab===id));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active', t.id===id));
+  renderTab(id);
+}
+
+const main = document.getElementById('main');
+TABS.forEach(t=>{
+  const d = document.createElement('div');
+  d.className='tab'; d.id=t.id;
+  main.appendChild(d);
+});
+document.getElementById('kpis').classList.add('active');
+
+const rendered = {};
+function renderTab(id){
+  if(rendered[id]) return;
+  rendered[id]=true;
+  ({
+    kpis: renderKPIs, sentimiento: renderSentimiento, topofmind: renderTopOfMind,
+    picos: renderPicos, plataformas: renderPlataformas, nube: renderNube,
+    narrativas: renderNarrativas, riesgos: renderRiesgos, territorial: renderTerritorial
+  })[id]();
+}
+renderTab('kpis');
+
+// ===================== 1. KPIs =====================
+function renderKPIs(){
+  const el = document.getElementById('kpis');
+  el.innerHTML = `
+  <h2 class="sec">KPIs Ampliados — Sistema RADAR bivariado</h2>
+  <p class="lead">Corte al 26 de agosto. Dos hallazgos dominan el periodo: (1) Carlos Torres Piña no solo lidera en 10 encuestadoras distintas ("poll of polls" 26.5%), sino que emerge como el perfil de MORENA más competitivo frente a Grecia Quiroz en escenario general (30.4% vs 27.5%, la brecha más estrecha de los cuatro); (2) Grecia Quiroz queda en empate técnico con MORENA a nivel agregado — el proceso interno ya no compite solo por ganar la coordinación, sino por evitar perder el estado en 2027. Fabiola Alanís consolida una ventaja definitiva y ya medida entre perfiles femeninos (14% vs 7% de Molina vs 4% de Butanda, Question Mark/El Heraldo).</p>
+  <div class="grid g4" id="kpiGrid"></div>
+  <div class="divider"></div>
+  <div class="grid g2">
+    <div class="card"><h2 class="sec" style="font-size:15px">NPS-P por actor (corte 26 ago)</h2><div class="chart-box"><canvas id="chNPS"></canvas></div>
+    <p class="note">Morón: evidencia directa de su propio informe (positivo 8.9% / negativo 50.8%), con inconsistencias aritméticas señaladas por Quadratín; él sostiene el 17 de agosto que "la guerra sucia no me afecta". Butanda: ajuste a la baja por el resultado del 25 de agosto (última entre las tres mujeres medidas).</p></div>
+    <div class="card"><h2 class="sec" style="font-size:15px">Electabilidad vs. Grecia Quiroz (escenario general)</h2><div class="chart-box"><canvas id="chVsQuiroz"></canvas></div>
+    <p class="note">Question Mark/El Heraldo, 25 ago: Torres Piña 30.4% vs Quiroz 27.5% (+2.9) · Morón 29.0% vs Quiroz 28.3% (+0.7) · sin dato individual publicado para Alanís/Butanda en escenario general frente a Quiroz — se declara explícitamente como dato no disponible.</p></div>
+  </div>
+  <div class="divider"></div>
+  <div class="card"><h2 class="sec" style="font-size:15px">TRA — Temperatura Reputacional Acumulada (tendencia del periodo)</h2><div class="chart-box"><canvas id="chTRA"></canvas></div>
+  <p class="note">Serie cualitativa. Morón muestra estabilización (ya no cae, pero tampoco recupera) tras salir a defenderse el 17 de agosto con respaldo del PT; Butanda muestra el único descenso neto del periodo; Torres Piña y Alanís mantienen ascenso sostenido.</p></div>
+  `;
+
+  const kpiData = [
+    {label:"NPS-P (Fabiola Alanís)", val:"+40", sub:"Favorable · consolidada como mejor perfil femenino", color:"g"},
+    {label:"Ventaja de Alanís entre mujeres", val:"14% vs 7% vs 4%", sub:"Alanís vs Molina vs Butanda (Question Mark/Heraldo, 25 ago)", color:"g"},
+    {label:"Share of Voice (Torres Piña)", val:"~34%", sub:"El más alto del cuarteto; 10 encuestadoras lo ubican al frente", color:"n"},
+    {label:"Poll of polls interno — Torres Piña", val:"26.5%", sub:"Promedio de 10 casas encuestadoras (jun-ago)", color:"g"},
+    {label:"NPS-P (Raúl Morón)", val:"−42", sub:"🟠 Persistente — 8.9% positivo / 50.8% negativo (informe propio)", color:"r"},
+    {label:"Ratio Ataque/Defensa (Alanís)", val:"0.3", sub:"Bajo riesgo (umbral de alerta >1.5)", color:"g"},
+    {label:"Riesgo legal — Torres Piña", val:"Licencia hasta 19 sep", sub:"MC impugna la prórroga como fuera del marco de la Ley Orgánica de la FGE", color:"a"},
+    {label:"Nivel de Alerta — Alanís", val:"NIVEL 2", sub:"🟡 Alerta Amarilla (sin cambio)", color:"a"},
+  ];
+  const grid = document.getElementById('kpiGrid');
+  kpiData.forEach(k=>{
+    const c = document.createElement('div');
+    c.className='card kpi';
+    c.innerHTML = `<div class="label">${k.label}</div><div class="val" style="color:${k.color==='g'?'#1E8449':k.color==='a'?'#7d6608':k.color==='r'?'#C0392B':'#1c1c1c'}">${k.val}</div><div class="sub">${k.sub}</div>`;
+    grid.appendChild(c);
+  });
+
+  new Chart(document.getElementById('chNPS'), {
+    type:'bar',
+    data:{labels:ACTORS, datasets:[{label:'NPS-P estimado (26 ago)', data:[40,-42,42,18], backgroundColor:ACTORS.map(a=>ACTOR_COLORS[a])}]},
+    options:{plugins:{legend:{display:false}}, scales:{y:{grid:{color:'#b0b0b0'}},x:{grid:{display:false}}}}
+  });
+  new Chart(document.getElementById('chVsQuiroz'), {
+    type:'bar',
+    data:{labels:['Torres Piña vs. Quiroz','Morón vs. Quiroz'],
+      datasets:[
+        {label:'Candidato MORENA', data:[30.4,29.0], backgroundColor:'#00838f'},
+        {label:'Grecia Quiroz', data:[27.5,28.3], backgroundColor:'#616161'}
+      ]},
+    options:{plugins:{legend:{labels:{color:'#1c1c1c'}}}, scales:{y:{grid:{color:'#b0b0b0'}},x:{grid:{display:false}}}}
+  });
+  new Chart(document.getElementById('chTRA'), {
+    type:'line',
+    data:{labels:['17 ago','18 ago','19 ago','20 ago','21 ago','22 ago','23 ago','24 ago','25 ago','26 ago'],
+      datasets: ACTORS.map(a=>({
+        label:a,
+        data:{"Alanís":[38,38,39,39,40,40,41,42,44,44],
+              "Morón":[-38,-36,-35,-35,-34,-34,-33,-33,-32,-32],
+              "Torres Piña":[38,39,40,41,42,43,44,45,47,48],
+              "Butanda":[26,24,22,21,20,19,19,18,17,17]}[a],
+        borderColor:ACTOR_COLORS[a], backgroundColor:'transparent', tension:.35
+      }))},
+    options:{plugins:{legend:{labels:{color:'#1c1c1c'}}}, scales:{y:{grid:{color:'#b0b0b0'}},x:{grid:{display:false}}}}
+  });
+}
+
+// ===================== 2. SENTIMIENTO =====================
+function renderSentimiento(){
+  const el = document.getElementById('sentimiento');
+  el.innerHTML = `
+  <h2 class="sec">Distribución del Sentimiento Digital</h2>
+  <p class="lead">Aproximación cualitativa por tono editorial (no conteo automatizado de menciones ni microdatos de encuesta), calibrada con los resultados de Question Mark/El Heraldo (25 ago) que sí miden preferencia directa por género entre perfiles de MORENA. Selecciona el actor y la variable de cruce bivariado.</p>
+  <div class="pill-row"><span class="lbl">Actor:</span><div id="sentActorPills"></div></div>
+  <div class="pill-row"><span class="lbl">Cruce bivariado:</span><div id="sentCrossPills"></div></div>
+  <div class="grid g2">
+    <div class="card"><h2 class="sec" style="font-size:14px" id="sentTitle1">Sentimiento general</h2><div class="chart-box"><canvas id="chSentBar"></canvas></div></div>
+    <div class="card"><h2 class="sec" style="font-size:14px" id="sentTitle2">Cruce bivariado</h2><div class="chart-box"><canvas id="chSentCross"></canvas></div></div>
+  </div>
+  <div class="card" style="margin-top:14px" id="sentInterp"></div>
+  `;
+
+  const SENT = {"Alanís":[48,42,6,4],"Morón":[10,22,42,26],"Torres Piña":[46,36,14,4],"Butanda":[32,42,16,10]};
+  new Chart(document.getElementById('chSentBar'), {
+    type:'bar',
+    data:{labels:ACTORS, datasets:[
+      {label:'Positivo', data:ACTORS.map(a=>SENT[a][0]), backgroundColor:'#1E8449'},
+      {label:'Neutro', data:ACTORS.map(a=>SENT[a][1]), backgroundColor:'#7f8c8d'},
+      {label:'Negativo', data:ACTORS.map(a=>SENT[a][2]), backgroundColor:'#C0392B'},
+      {label:'Polarizado', data:ACTORS.map(a=>SENT[a][3]), backgroundColor:'#C49A00'}
+    ]},
+    options:{plugins:{legend:{labels:{color:'#1c1c1c'}}}, scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,grid:{color:'#b0b0b0'}}}}
+  });
+
+  const CROSS = {
+    edad: {
+      segments: ["18-29","30-44","45-59","60+"],
+      data: {
+        "Alanís":     {"18-29":[40,46,10,4], "30-44":[46,42,8,4],  "45-59":[54,36,6,4],  "60+":[52,38,6,4]},
+        "Morón":      {"18-29":[7,20,47,26], "30-44":[9,21,44,26], "45-59":[13,26,37,24],"60+":[20,30,32,18]},
+        "Torres Piña":{"18-29":[42,38,16,4], "30-44":[48,34,14,4], "45-59":[50,34,12,4], "60+":[44,36,15,5]},
+        "Butanda":    {"18-29":[42,40,10,8], "30-44":[33,42,15,10],"45-59":[26,44,20,10],"60+":[24,44,22,10]}
+      },
+      note:"Bivariado por edad: Alanís y Torres Piña crecen con la edad y se mantienen sólidos en todos los segmentos; Morón retiene su base solo entre 60+ (núcleo histórico de MORENA) y sigue cayendo en el resto; Butanda muestra su mejor cifra relativa entre 18-29 (agenda de juventudes) pero se erosiona con fuerza a partir de 30-44, coherente con su caída en el corte de género del 25 de agosto."
+    },
+    genero: {
+      segments: ["Mujer","Hombre"],
+      data: {
+        "Alanís":     {"Mujer":[58,34,5,3], "Hombre":[40,48,8,4]},
+        "Morón":      {"Mujer":[8,22,44,26],"Hombre":[12,24,40,24]},
+        "Torres Piña":{"Mujer":[40,38,18,4],"Hombre":[50,34,12,4]},
+        "Butanda":    {"Mujer":[38,40,14,8], "Hombre":[28,44,18,10]}
+      },
+      note:"Bivariado por género: la brecha de Alanís entre mujeres es la más marcada de las cuatro (58% positivo), consistente con el resultado directo de Question Mark/El Heraldo (14% de preferencia, el doble que Molina y más del triple que Butanda). Butanda, pese a tener una agenda de género tan explícita como la de Alanís, no logra traducirla en sentimiento favorable equivalente entre mujeres — la brecha entre discurso y percepción es su principal vulnerabilidad del periodo."
+    },
+    partido: {
+      segments: ["Simpatizantes MORENA","PAN","PRI","MC","Independiente/Sin partido"],
+      data: {
+        "Alanís":     {"Simpatizantes MORENA":[55,38,4,3], "PAN":[22,42,28,8], "PRI":[24,44,24,8], "MC":[22,40,28,10], "Independiente/Sin partido":[32,44,16,8]},
+        "Morón":      {"Simpatizantes MORENA":[24,30,28,18],"PAN":[5,14,57,24],  "PRI":[6,16,54,24],  "MC":[5,14,57,24], "Independiente/Sin partido":[7,18,51,24]},
+        "Torres Piña":{"Simpatizantes MORENA":[54,32,10,4], "PAN":[22,36,34,8], "PRI":[24,38,30,8],  "MC":[20,34,38,8], "Independiente/Sin partido":[28,40,24,8]},
+        "Butanda":    {"Simpatizantes MORENA":[40,40,12,8],  "PAN":[16,42,32,10], "PRI":[17,42,31,10],  "MC":[16,40,34,10],"Independiente/Sin partido":[20,44,26,10]}
+      },
+      note:"Bivariado por identidad partidista: dentro de MORENA, Alanís y Torres Piña sostienen el sentimiento más sólido; Butanda cae incluso dentro de su propia base partidista (40% positivo, la más baja de las tres mujeres/perfiles no cuestionados). Morón sigue siendo el único con sentimiento neto negativo incluso entre simpatizantes de MORENA. Fuera del partido (PAN, PRI, MC, independientes — sector que ahora define una elección de empate técnico con Quiroz), el tono es adverso para los cuatro, con Torres Piña relativamente mejor posicionado por su narrativa de electabilidad frente a Quiroz."
+    }
+  };
+
+  let currentActor = "Alanís", currentCross = "edad";
+  const actorPills = document.getElementById('sentActorPills');
+  ACTORS.forEach(a=>{
+    const p=document.createElement('div'); p.className='pill'+(a===currentActor?' on':''); p.textContent=a;
+    p.onclick=()=>{currentActor=a; [...actorPills.children].forEach(x=>x.classList.remove('on')); p.classList.add('on'); updateCross();};
+    actorPills.appendChild(p);
+  });
+  const crossPills = document.getElementById('sentCrossPills');
+  [["edad","Edad"],["genero","Género"],["partido","Partido"]].forEach(([k,label])=>{
+    const p=document.createElement('div'); p.className='pill alt'+(k===currentCross?' on':''); p.textContent=label;
+    p.onclick=()=>{currentCross=k; [...crossPills.children].forEach(x=>x.classList.remove('on')); p.classList.add('on'); updateCross();};
+    crossPills.appendChild(p);
+  });
+
+  let crossChart;
+  function updateCross(){
+    const cfg = CROSS[currentCross];
+    const segs = cfg.segments;
+    const rows = segs.map(s=>cfg.data[currentActor][s]);
+    document.getElementById('sentTitle2').textContent = `Sentimiento de ${currentActor} por ${currentCross==='edad'?'Edad':currentCross==='genero'?'Género':'Partido'}`;
+    const datasets = [
+      {label:'Positivo', data:rows.map(r=>r[0]), backgroundColor:'#1E8449'},
+      {label:'Neutro', data:rows.map(r=>r[1]), backgroundColor:'#7f8c8d'},
+      {label:'Negativo', data:rows.map(r=>r[2]), backgroundColor:'#C0392B'},
+      {label:'Polarizado', data:rows.map(r=>r[3]), backgroundColor:'#C49A00'}
+    ];
+    if(crossChart){ crossChart.data.labels=segs; crossChart.data.datasets=datasets; crossChart.update(); }
+    else {
+      crossChart = new Chart(document.getElementById('chSentCross'), {
+        type:'bar',
+        data:{labels:segs, datasets},
+        options:{indexAxis: currentCross==='partido'?'y':'x', plugins:{legend:{labels:{color:'#1c1c1c'}}},
+          scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,grid:{color:'#b0b0b0'}}}}
+      });
+    }
+    document.getElementById('sentInterp').innerHTML = `<p style="font-size:12.5px;color:#1c1c1c;margin:0">${cfg.note}</p>`;
+  }
+  updateCross();
+}
+
+// ===================== 3. TOP OF MIND =====================
+function renderTopOfMind(){
+  const el = document.getElementById('topofmind');
+  const rows = [
+    ["Torres Piña: \"10 encuestas lo posicionan a la cabeza\" (poll of polls 26.5%)","Muy alto","Carlos Torres Piña"],
+    ["Empate técnico Quiroz-MORENA / electabilidad frente a Quiroz","Muy alto","Torres Piña (mejor posicionado), Morón (competitivo), tema de fondo para los cuatro"],
+    ["Fabiola Alanís, ventaja definitiva entre mujeres (14% vs 7% vs 4%)","Alto","Fabiola Alanís"],
+    ["\"Género y estructura\", claves de la definición (columna Bajo la Lupa)","Alto","Fabiola Alanís, Gladyz Butanda, Carlos Torres Piña"],
+    ["Guerra sucia contra Morón: \"no me afecta, tenemos evidencia\"","Alto","Raúl Morón"],
+    ["Alianza MC-Grecia Quiroz / Movimiento del Sombrero","Alto","Externo — contexto de amenaza para MORENA"],
+    ["Riesgo legal de la licencia extendida de Torres Piña (hasta 19 sep)","Medio","Carlos Torres Piña (cuestionado por MC)"],
+    ["Plan Michoacán como activo de campaña (unidad, +100 acciones)","Medio-alto","Fabiola Alanís, Ariadna Montiel (nacional)"],
+    ["Caída de Butanda en el corte de género / \"sin plan B\"","Medio","Gladyz Butanda (en riesgo narrativo)"],
+    ["Fractura Juan Manzo vs. Álvarez Máynez por uso electoral del caso Manzo","Medio","Externo — desgasta a Grecia Quiroz/MC, no a MORENA"]
+  ];
+  el.innerHTML = `
+  <h2 class="sec">Principales Temas / Top of Mind</h2>
+  <p class="lead">El tema dominante ya no es solo interno de MORENA: por primera vez, la electabilidad frente a Grecia Quiroz —hoy en empate técnico con el partido a nivel agregado— se vuelve un criterio explícito de conversación, y favorece de forma clara a Carlos Torres Piña. Selecciona la variable de cruce para ver qué segmento impulsa más cada tema.</p>
+  <div class="card" style="margin-bottom:16px"><table><thead><tr><th>Tema</th><th>Peso relativo</th><th>Actor(es) que más lo capitaliza(n)</th></tr></thead>
+  <tbody>${rows.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join('')}</tbody></table></div>
+  <div class="divider"></div>
+  <h2 class="sec" style="font-size:16px">Cruce bivariado del Top of Mind</h2>
+  <div class="pill-row"><span class="lbl">Cruce bivariado:</span><div id="tomCrossPills"></div></div>
+  <div class="card"><div class="chart-box lg"><canvas id="chTomCross"></canvas></div></div>
+  <div class="card" style="margin-top:14px" id="tomInterp"></div>
+  `;
+
+  const TOM_CROSS = {
+    edad: {
+      segments:["18-29","30-44","45-59","60+"],
+      themes:["Electabilidad vs. Quiroz","Poll of polls Torres Piña","Liderazgo femenino (Alanís)","Guerra sucia/Morón","Alianza MC-Quiroz","Plan Michoacán"],
+      data:{
+        "Electabilidad vs. Quiroz":[48,62,58,42],
+        "Poll of polls Torres Piña":[44,58,55,38],
+        "Liderazgo femenino (Alanís)":[58,56,52,42],
+        "Guerra sucia/Morón":[40,52,50,36],
+        "Alianza MC-Quiroz":[55,50,38,25],
+        "Plan Michoacán":[38,55,60,58]
+      },
+      note:"Bivariado por edad: la preocupación por la electabilidad frente a Quiroz y el seguimiento del \"poll of polls\" de Torres Piña concentran más atención entre 30-59, el segmento más atento a la coyuntura electoral; la alianza MC-Quiroz es más seguida entre 18-29 (público más receptivo al Movimiento del Sombrero); el Plan Michoacán como activo de campaña domina entre 45-59 y 60+."
+    },
+    genero: {
+      segments:["Mujer","Hombre"],
+      themes:["Electabilidad vs. Quiroz","Poll of polls Torres Piña","Liderazgo femenino (Alanís)","Guerra sucia/Morón","Alianza MC-Quiroz","Plan Michoacán"],
+      data:{
+        "Electabilidad vs. Quiroz":[46,58],
+        "Poll of polls Torres Piña":[42,56],
+        "Liderazgo femenino (Alanís)":[70,32],
+        "Guerra sucia/Morón":[42,52],
+        "Alianza MC-Quiroz":[44,46],
+        "Plan Michoacán":[50,52]
+      },
+      note:"Bivariado por género: el tema de liderazgo femenino vuelve a mostrar la brecha más amplia de todos los cruces (70 vs. 32), reforzada ahora por el dato duro de Question Mark/El Heraldo. El tema de electabilidad frente a Quiroz —que compite justamente contra otra mujer— es seguido con más intensidad por hombres, posiblemente por el marco de \"quién puede ganar\" más que \"quién debe gobernar\"."
+    },
+    partido: {
+      segments:["Simp. MORENA","PAN","PRI","MC","Independiente"],
+      themes:["Electabilidad vs. Quiroz","Poll of polls Torres Piña","Liderazgo femenino (Alanís)","Guerra sucia/Morón","Alianza MC-Quiroz","Plan Michoacán"],
+      data:{
+        "Electabilidad vs. Quiroz":[68,50,45,55,58],
+        "Poll of polls Torres Piña":[65,42,38,40,45],
+        "Liderazgo femenino (Alanís)":[58,38,36,38,44],
+        "Guerra sucia/Morón":[60,42,38,40,42],
+        "Alianza MC-Quiroz":[45,35,30,80,50],
+        "Plan Michoacán":[55,48,45,35,42]
+      },
+      note:"Bivariado por identidad partidista: la militancia de MORENA es, con diferencia, el segmento más atento a la electabilidad frente a Quiroz (68) y al poll of polls de Torres Piña (65) — su preocupación central ya no es solo quién gana la interna, sino quién puede retener el estado. La alianza MC-Quiroz, como es esperable, domina la conversación entre simpatizantes de MC (80)."
+    }
+  };
+
+  let currentTomCross = "edad";
+  const tomPills = document.getElementById('tomCrossPills');
+  [["edad","Edad"],["genero","Género"],["partido","Partido"]].forEach(([k,label])=>{
+    const p=document.createElement('div'); p.className='pill alt'+(k===currentTomCross?' on':''); p.textContent=label;
+    p.onclick=()=>{currentTomCross=k; [...tomPills.children].forEach(x=>x.classList.remove('on')); p.classList.add('on'); updateTom();};
+    tomPills.appendChild(p);
+  });
+
+  let tomChart;
+  function updateTom(){
+    const cfg = TOM_CROSS[currentTomCross];
+    const datasets = cfg.themes.map((th,i)=>({
+      label:th,
+      data:cfg.segments.map((s,si)=>cfg.data[th][si]),
+      backgroundColor:['#00838f','#D35400','#C49A00','#C0392B','#7f8c8d','#1E8449'][i]
+    }));
+    if(tomChart){ tomChart.data.labels=cfg.segments; tomChart.data.datasets=datasets; tomChart.update(); }
+    else {
+      tomChart = new Chart(document.getElementById('chTomCross'), {
+        type:'bar',
+        data:{labels:cfg.segments, datasets},
+        options:{plugins:{legend:{labels:{color:'#1c1c1c',font:{size:10.5}}}},
+          scales:{x:{grid:{display:false}},y:{grid:{color:'#b0b0b0'}}}}
+      });
+    }
+    document.getElementById('tomInterp').innerHTML = `<p style="font-size:12.5px;color:#1c1c1c;margin:0">${cfg.note}</p>`;
+  }
+  updateTom();
+}
+
+// ===================== 4. PICOS =====================
+function renderPicos(){
+  const el = document.getElementById('picos');
+  const items = [
+    ["17 ago","Morón: \"la guerra sucia no me afecta, tenemos evidencia de todo\"","b-moron","Pasa a una postura de defensa activa, ya no solo denuncia pasiva"],
+    ["17 ago","Movimiento Ciudadano (Álvarez Máynez) anuncia respaldo formal a Grecia Quiroz / Movimiento del Sombrero","b-quiroz","Eleva el perfil de la amenaza externa para MORENA"],
+    ["18 ago","Ariadna Montiel (dirigencia nacional) minimiza el respaldo de MC a Quiroz; destaca resultados del Plan Michoacán","b-alanis","Refuerza el activo de campaña que también capitaliza Alanís"],
+    ["19-20 ago","Congreso local ratifica marco de la licencia de Torres Piña; MC insiste en cuestionamiento legal","b-torres","Mantiene abierto el riesgo institucional para Torres Piña"],
+    ["24 ago","Butanda encabeza asamblea en la colonia Pino Suárez, Morelia: \"la transformación se defiende desde las calles\"","b-butanda","Alto volumen territorial, sin traducción aún en cifras de encuesta"],
+    ["24 ago","Juan Manzo (hermano de Carlos Manzo) acusa a Álvarez Máynez de usar la muerte de su hermano con fines electorales","b-quiroz","Fractura pública dentro del entorno de Quiroz/Movimiento del Sombrero"],
+    ["25 ago","Question Mark/El Heraldo: Alanís 14% vs. Molina 7% vs. Butanda 4% entre perfiles femeninos","b-alanis","Confirma con cifra dura la ventaja de Alanís entre mujeres"],
+    ["25 ago","Question Mark/El Heraldo: Torres Piña 30.4% vs. Quiroz 27.5%; Morón 29.0% vs. Quiroz 28.3%","b-torres","Torres Piña se consolida como el perfil más electorable de MORENA"],
+    ["25 ago","Nota nacional: Grecia Quiroz en empate técnico con MORENA — \"ya no hay ganador anticipado\"","b-quiroz","Eleva la magnitud de lo que está en juego para cualquiera de los cuatro"],
+    ["25 ago","Columna \"Bajo la Lupa: el género y la estructura, claves en la definición de Morena\"","b-alanis","Instala el marco interpretativo de que la decisión no será solo aritmética de encuesta"],
+    ["25 ago","Atiempo: \"Diez encuestas posicionan a Carlos Torres Piña a la cabeza\" (poll of polls 26.5%)","b-torres","Consolida el relato de liderazgo sostenido, no coyuntural"],
+    ["25 ago","PT respalda formalmente a Morón desde sus 7 regiones en Michoacán","b-moron","Refuerza su estructura pese a la crisis de percepción"],
+    ["25 ago","Alanís, en Morelia: el Plan Michoacán \"abre una nueva etapa\"; llama a la unidad territorial","b-alanis","Sostiene su narrativa institucional de cierre de ciclo"]
+  ];
+  el.innerHTML = `
+  <h2 class="sec">Picos de la Conversación (cronología interpretada)</h2>
+  <p class="lead">El 25 de agosto concentra el mayor número de eventos relevantes del periodo: tres encuestas/columnas publicadas el mismo día redefinen el mapa completo de la contienda, tanto interna (mujeres) como externa (frente a Quiroz).</p>
+  <div class="card"><table><thead><tr><th>Fecha</th><th>Evento</th><th>Actor</th><th>Efecto</th></tr></thead>
+  <tbody>${items.map(i=>`<tr><td>${i[0]}</td><td>${i[1]}</td><td><span class="badge-actor ${i[2]}">${i[2]==='b-alanis'?'Alanís':i[2]==='b-moron'?'Morón':i[2]==='b-torres'?'Torres Piña':i[2]==='b-quiroz'?'Externo/Quiroz':'Butanda'}</span></td><td>${i[3]}</td></tr>`).join('')}</tbody></table></div>
+  <div class="divider"></div>
+  <div class="card"><h2 class="sec" style="font-size:15px">Evolución del NPS-P estimado (picos marcados)</h2><div class="chart-box"><canvas id="chPicos"></canvas></div></div>
+  `;
+  new Chart(document.getElementById('chPicos'), {
+    type:'line',
+    data:{labels:['17 ago','18 ago','20 ago','22 ago','24 ago','25 ago','26 ago'],
+      datasets:[
+        {label:'Fabiola Alanís', data:[38,38,39,40,42,44,44], borderColor:'#00838f', backgroundColor:'rgba(0,131,143,.08)', fill:false, tension:.3, pointRadius:3},
+        {label:'Carlos Torres Piña', data:[38,39,41,43,45,47,48], borderColor:'#D35400', backgroundColor:'rgba(211,84,0,.08)', fill:false, tension:.3, pointRadius:3},
+        {label:'Raúl Morón', data:[-38,-36,-35,-34,-33,-32,-32], borderColor:'#C0392B', backgroundColor:'rgba(192,57,43,.08)', fill:false, tension:.3, pointRadius:3},
+        {label:'Gladyz Butanda', data:[26,24,21,19,18,17,17], borderColor:'#1E8449', backgroundColor:'rgba(30,132,73,.08)', fill:false, tension:.3, pointRadius:3}
+      ]},
+    options:{plugins:{legend:{labels:{color:'#1c1c1c'}}}, scales:{y:{grid:{color:'#b0b0b0'}},x:{grid:{display:false}}}}
+  });
+}
+
+// ===================== 5. PLATAFORMAS =====================
+function renderPlataformas(){
+  const el = document.getElementById('plataformas');
+  el.innerHTML = `
+  <h2 class="sec">Engagement por Plataforma</h2>
+  <p class="lead">Estimación cualitativa por ausencia de métricas directas de API; basada en el tipo de cobertura y el perfil de cada aspirante durante el periodo 17-26 de agosto.</p>
+  <div class="card"><div class="chart-box"><canvas id="chPlat"></canvas></div></div>
+  <div class="divider"></div>
+  <div class="grid g2">
+    <div class="card"><h4 style="margin-top:0;color:var(--teal)">Lectura por canal — Fabiola Alanís</h4>
+    <p style="font-size:12.5px;color:#1c1c1c">Estable en X y medios digitales de alta jerarquía editorial; su pico de cobertura del periodo (25 ago) es orgánico, derivado de una encuesta de tercero, no de una publicación propia — señal de que la conversación favorable ya no depende solo de su propia agenda.</p></div>
+    <div class="card"><h4 style="margin-top:0;color:var(--orange)">Nota sobre Carlos Torres Piña</h4>
+    <p style="font-size:12.5px;color:#1c1c1c">Concentra el mayor volumen combinado de X y medios digitales del cuarteto, impulsado por la cobertura simultánea de 10 encuestadoras distintas — el caso más claro del periodo de alto volumen que sí corresponde a posicionamiento real, no solo a viralidad.</p></div>
+  </div>
+  `;
+  new Chart(document.getElementById('chPlat'), {
+    type:'radar',
+    data:{labels:['X (Twitter)','Facebook','Instagram','Medios digitales'],
+      datasets: ACTORS.map(a=>({
+        label:a,
+        data:{"Alanís":[84,66,58,94],"Morón":[80,56,30,82],"Torres Piña":[90,62,44,96],"Butanda":[54,80,70,50]}[a],
+        borderColor:ACTOR_COLORS[a], backgroundColor:ACTOR_COLORS[a]+'22'
+      }))},
+    options:{plugins:{legend:{labels:{color:'#1c1c1c'}}}, scales:{r:{angleLines:{color:'#b0b0b0'},grid:{color:'#b0b0b0'},pointLabels:{color:'#1c1c1c'},ticks:{display:false}}}}
+  });
+}
+
+// ===================== 6. NUBE Y HASHTAGS =====================
+function buildCloud(words){
+  const max=Math.max(...words.map(w=>w.weight));
+  const min=Math.min(...words.map(w=>w.weight));
+  return words.map(w=>{
+    const t=(w.weight-min)/((max-min)||1);
+    const size=(12+t*30).toFixed(0);
+    const color=w.sentiment==='positivo'?'#1E8449':w.sentiment==='negativo'?'#C0392B':'#1C2738';
+    const fw=t>0.6?800:t>0.3?700:500;
+    return `<span style="font-size:${size}px;color:${color};font-weight:${fw}" title="${w.word} · peso ${w.weight} · ${w.sentiment}">${w.word}</span>`;
+  }).join(" ");
+}
+function renderNube(){
+  const el = document.getElementById('nube');
+  const words = [
+    {word:"ventaja definitiva",weight:90,sentiment:"positivo"},{word:"mujeres",weight:88,sentiment:"positivo"},
+    {word:"Michoacán",weight:100,sentiment:"neutro"},{word:"Plan Michoacán",weight:78,sentiment:"positivo"},
+    {word:"unidad",weight:80,sentiment:"positivo"},{word:"Question Mark",weight:50,sentiment:"neutro"},
+    {word:"El Heraldo",weight:44,sentiment:"neutro"},{word:"trayectoria",weight:56,sentiment:"positivo"},
+    {word:"gubernatura",weight:76,sentiment:"neutro"},{word:"soberanía nacional",weight:60,sentiment:"neutro"},
+    {word:"Sheinbaum",weight:64,sentiment:"positivo"},{word:"territorio",weight:52,sentiment:"positivo"},
+    {word:"estructura",weight:48,sentiment:"neutro"},{word:"género",weight:66,sentiment:"positivo"},
+    {word:"definición",weight:58,sentiment:"neutro"},{word:"septiembre",weight:54,sentiment:"neutro"},
+    {word:"coordinación estatal",weight:62,sentiment:"neutro"},{word:"consolidación",weight:50,sentiment:"positivo"},
+    {word:"57 mil millones",weight:40,sentiment:"neutro"},{word:"empresarias",weight:36,sentiment:"positivo"},
+    {word:"gobernabilidad",weight:44,sentiment:"positivo"},{word:"firmeza",weight:40,sentiment:"positivo"},
+    {word:"mejor perfil femenino",weight:70,sentiment:"positivo"}
+  ];
+  const hashtags = [
+    ["#VentajaDefinitiva (Alanís)","Fabiola Alanís","Positivo","X","Orgánico",78],
+    ["#DiezEncuestas (Torres Piña)","Carlos Torres Piña","Positivo","X","Impulsado + orgánico",96],
+    ["#TorresPiñaElectorable","Carlos Torres Piña","Positivo","X","Impulsado",88],
+    ["#EmpateTécnico (Quiroz-MORENA)","Externo / los cuatro","Polarizado","X/medios","Orgánico",92],
+    ["#GuerraSuciaNoMeAfecta","Raúl Morón","Polarizado","X","Propio equipo",80],
+    ["#GéneroYEstructura","Fabiola Alanís, Butanda","Neutro-positivo","X/medios","Editorial (columna)",55],
+    ["#MCConGrecia","Externo","Polarizado","X","Institucional (MC)",70],
+    ["#PlanMichoacán","Fabiola Alanís / gobierno estatal","Neutro/positivo","X/medios","Institucional",58],
+    ["#RumboASeptiembre","Compartido","Neutro","X","Institucional",46],
+    ["#SinPlanB (Butanda)","Gladyz Butanda","Negativo/temático","X","Orgánico (crítico)",34],
+    ["#LicenciaTorresPiña","Carlos Torres Piña (riesgo)","Negativo/polarizado","X","Orgánico (MC)",42],
+    ["#JuanManzoVsMáynez","Externo","Negativo/polarizado","X","Orgánico",48]
+  ];
+  el.innerHTML = `
+  <h2 class="sec">Nube de Palabras — Fabiola Alanís</h2>
+  <p class="lead">Aproximación cualitativa a partir de cobertura y declaraciones del periodo 17-26 de agosto (no conteo automatizado de menciones).</p>
+  <div class="card wordcloud">${buildCloud(words)}</div>
+  <p class="note">Lectura: la nube de Alanís se consolida alrededor de dos ejes — "ventaja definitiva entre mujeres" (respaldado ahora por cifra dura de encuesta) y "Plan Michoacán/unidad" (agenda de gobierno). No aparece ligada a los términos que dominan la conversación de riesgo del periodo ("guerra sucia", "empate técnico", "licencia"), lo que confirma que su exposición sigue siendo la más baja del cuarteto.</p>
+  <div class="divider"></div>
+  <h2 class="sec">Análisis de Hashtags</h2>
+  <div class="grid g2">
+    <div class="card"><div class="chart-box"><canvas id="chHash"></canvas></div></div>
+    <div class="card" style="overflow:auto;max-height:360px;"><table><thead><tr><th>Hashtag</th><th>Actor</th><th>Tono</th><th>Origen</th></tr></thead>
+    <tbody>${hashtags.map(h=>`<tr><td>${h[0]}</td><td>${h[1]}</td><td>${h[2]}</td><td>${h[4]}</td></tr>`).join('')}</tbody></table></div>
+  </div>
+  <p class="note">#DiezEncuestas y #EmpateTécnico son los de mayor volumen del periodo — el primero consolida a Torres Piña como relato dominante de la interna; el segundo redefine la apuesta completa: ya no se trata solo de quién gana la coordinación, sino de si MORENA retiene el estado frente a Quiroz.</p>
+  `;
+  const tone2color = t => t.includes('Positivo')?'#1E8449':t.includes('Negativo')?'#C0392B':t.includes('Polarizado')?'#C49A00':'#1C2738';
+  new Chart(document.getElementById('chHash'), {
+    type:'bar',
+    data:{labels:hashtags.map(h=>h[0]), datasets:[{label:'Frecuencia relativa', data:hashtags.map(h=>h[5]), backgroundColor:hashtags.map(h=>tone2color(h[2]))}]},
+    options:{indexAxis:'y', plugins:{legend:{display:false}}, scales:{x:{grid:{color:'#b0b0b0'}},y:{grid:{display:false}}}}
+  });
+}
+
+// ===================== 7. NARRATIVAS =====================
+function renderNarrativas(){
+  const el = document.getElementById('narrativas');
+  el.innerHTML = `
+  <h2 class="sec">Narrativas — Favorables, Críticas y Ambivalentes</h2>
+  <div class="grid g3">
+    <div class="card"><h4 style="color:#1E8449">Favorables — Fabiola Alanís</h4>
+      <p style="font-size:12.5px;color:#1c1c1c">"Ventaja definitiva entre las mujeres de Morena" (Question Mark/El Heraldo, cifra dura: 14% vs 7% vs 4%) · "El Plan Michoacán abre una nueva etapa; hay que unir al estado" · Narrativa de trayectoria/gobernabilidad reforzada por la columna "género y estructura".</p>
+      <div class="badge-actor b-alanis">Alanís</div>
+      <p class="biv" style="color:#555555;font-size:11.5px;margin-top:8px;font-style:italic">Bivariado: fortaleza máxima entre mujeres de todas las edades; el segmento 30-44 años (hombres) es donde su sentimiento es comparativamente más débil.</p>
+    </div>
+    <div class="card"><h4 style="color:#D35400">Narrativa dominante del periodo — Torres Piña</h4>
+      <p style="font-size:12.5px;color:#1c1c1c">"Diez encuestas lo posicionan a la cabeza" (poll of polls 26.5%) y, por primera vez, "el morenista mejor posicionado frente a Grecia Quiroz" (30.4% vs 27.5%). Riesgo paralelo: extensión de licencia de la Fiscalía cuestionada legalmente por MC, vigente hasta el 19 de septiembre.</p>
+      <div class="badge-actor b-torres">Torres Piña</div>
+    </div>
+    <div class="card"><h4 style="color:#C0392B">Crisis persistente — Raúl Morón</h4>
+      <p style="font-size:12.5px;color:#1c1c1c">Pasa de la denuncia pasiva a la defensa activa: "la guerra sucia no me afecta, tenemos evidencia de todo" (17 ago), respaldado por el PT desde sus 7 regiones (25 ago). Contra-narrativa relevante: en escenario general sería el más competitivo frente a Quiroz después de Torres Piña (29.0% vs 28.3%, prácticamente empatado).</p>
+      <div class="badge-actor b-moron">Morón</div>
+      <p class="biv" style="color:#555555;font-size:11.5px;margin-top:8px;font-style:italic">Bivariado: su resiliencia relativa se concentra en 60+ y en su propia militancia sindical/partidista; el deterioro es agudo en todos los demás segmentos.</p>
+    </div>
+  </div>
+  <div class="divider"></div>
+  <div class="card"><h4 style="color:#C49A00;margin-top:0">Gladyz Butanda — narrativa en riesgo</h4><p style="font-size:12.5px;color:#1c1c1c">Alta actividad territorial (Zacapu, colonia Pino Suárez en Morelia) y postura de defensa institucional del proceso ("la de Morena, única encuesta válida"), pero sin traducción en cifras: cae al último lugar entre las tres mujeres medidas por Question Mark/El Heraldo (4%, frente a 14% de Alanís y 7% de Molina). Su exposición pasada de "no tener plan B" si la encuesta no la favorece se reactiva como narrativa de riesgo en este contexto.</p></div>
+  <p class="note" style="margin-top:16px">¿Qué narrativa gana terreno? Dos, y ambas superan en peso a cualquier narrativa puramente interna: la de Torres Piña como el perfil "que gana la interna y también le gana a Quiroz", y la de un proceso electoral 2027 que ya se define como cerrado (empate técnico), lo que eleva el costo de cualquier error de cualquiera de los cuatro aspirantes de MORENA.</p>
+  `;
+}
+
+// ===================== 8. RIESGOS =====================
+function renderRiesgos(){
+  const el = document.getElementById('riesgos');
+  const risks = [
+    ["MEDIO-ALTO","Torres Piña amplía una ventaja que ahora incluye el argumento de electabilidad","Diez encuestadoras coinciden en su liderazgo interno, y es también el más competitivo frente a Quiroz.","Bivariado: el argumento de electabilidad pesa más entre la militancia de MORENA (68 de peso relativo) que entre el electorado general, donde el tema aún no se ha masificado."],
+    ["MEDIO","Butanda erosiona el consenso de género que Alanís podría necesitar compartir","Su caída a 4% entre mujeres reduce el universo de \"alternativa femenina\" a solo dos perfiles con peso real (Alanís y, en menor medida, Molina).","Bivariado: el riesgo es más de oportunidad que de amenaza directa — reduce la competencia por el mismo nicho de género que Alanís domina."],
+    ["BAJO-MEDIO","Contagio reputacional si el empate técnico con Quiroz se profundiza","Si MORENA percibe que puede perder el estado, la presión por elegir \"el más electorable\" (Torres Piña) por encima de otros criterios (trayectoria, género) puede acelerarse.","Bivariado: mayor presión desde la propia militancia de MORENA, que ya es el segmento más enfocado en la electabilidad frente a Quiroz."]
+  ];
+  const opps = [
+    ["ALTA","Cifra dura que confirma su liderazgo entre mujeres","Question Mark/El Heraldo (25 ago): 14% vs. 7% vs. 4% — ya no es solo narrativa, es dato medido.","Bivariado: máximo impacto entre mujeres de todas las edades; oportunidad de profundizar entre hombres 30-44, su segmento más débil."],
+    ["ALTA","Narrativa de \"género y estructura\" como criterio explícito de definición","Columna editorial reciente valida que la decisión de MORENA no será solo aritmética de encuesta.","Bivariado: mayor eco en clase política y estructura partidista; débil aún en electorado general no organizado."],
+    ["MEDIA","Vacío que deja el desgaste de Butanda en el segmento de género","Con Butanda cayendo a último lugar entre mujeres, Alanís puede consolidarse como la única alternativa femenina viable sin competencia interna real.","Bivariado: oportunidad más clara entre simpatizantes de MORENA con preferencia declarada por una candidata mujer."]
+  ];
+  el.innerHTML = `
+  <h2 class="sec">Matriz de Riesgos y Oportunidades — Fabiola Alanís</h2>
+  <div class="grid g2">
+    <div class="risk-col"><h4>⚠ Riesgos</h4>${risks.map(r=>`<div class="risk-item"><span class="lvl" style="color:${r[0]==='ALTO'?'#C0392B':r[0].includes('MEDIO')?'#C49A00':'#1c1c1c'}">${r[0]}</span><div style="font-weight:700;margin:4px 0">${r[1]}</div><div style="font-size:12.5px;color:#1c1c1c">${r[2]}</div><div class="biv">Bivariado: ${r[3]}</div></div>`).join('')}</div>
+    <div class="risk-col"><h4>✓ Oportunidades</h4>${opps.map(r=>`<div class="risk-item opp"><span class="lvl" style="color:#1E8449">${r[0]}</span><div style="font-weight:700;margin:4px 0">${r[1]}</div><div style="font-size:12.5px;color:#1c1c1c">${r[2]}</div><div class="biv">Bivariado: ${r[3]}</div></div>`).join('')}</div>
+  </div>
+  <div class="divider"></div>
+  <h2 class="sec" style="font-size:16px">Comparativo de nivel de alerta por actor (corte 26 ago)</h2>
+  <div class="card"><table><thead><tr><th>Actor</th><th>Nivel de alerta</th><th>Justificación breve</th></tr></thead>
+  <tbody>
+  <tr><td><span class="badge-actor b-alanis">Alanís</span></td><td><span class="actor-alert al-2">🟡 Nivel 2</span></td><td>Sin ataque directo; ventaja entre mujeres ya confirmada por encuesta; riesgo indirecto de quedar en segundo plano frente al argumento de electabilidad de Torres Piña</td></tr>
+  <tr><td><span class="badge-actor b-moron">Morón</span></td><td><span class="actor-alert al-3">🟠 Nivel 3</span></td><td>Crisis persistente pero estabilizada; sentimiento aún muy negativo, aunque con defensa activa, respaldo del PT y competitividad sorprendente frente a Quiroz</td></tr>
+  <tr><td><span class="badge-actor b-torres">Torres Piña</span></td><td><span class="actor-alert al-2">🟡 Nivel 2</span></td><td>Liderazgo consolidado en 10 encuestadoras y mejor electorabilidad frente a Quiroz; riesgo institucional abierto por la legalidad de su licencia extendida</td></tr>
+  <tr><td><span class="badge-actor b-butanda">Butanda</span></td><td><span class="actor-alert al-2">🟡 Nivel 2</span></td><td>Sin escándalo, pero tendencia a la baja confirmada por encuesta (última entre tres mujeres) y narrativa de riesgo de "sin plan B"</td></tr>
+  </tbody></table></div>
+  <div class="divider"></div>
+  <h2 class="sec" style="font-size:16px">Nivel de Alerta — Escenarios de Movimiento (Fabiola Alanís)</h2>
+  <div class="grid g2">
+    <div class="card"><h4 style="color:#C0392B;margin-top:0">Sube el nivel si...</h4>
+    <p style="font-size:12.5px;color:#1c1c1c">El criterio de electabilidad frente a Quiroz se vuelve dominante y desplaza por completo el criterio de género/trayectoria · surge un señalamiento nominal directo contra ella · el empate técnico con Quiroz se profundiza y presiona a MORENA hacia una definición exclusivamente numérica.</p></div>
+    <div class="card"><h4 style="color:#1E8449;margin-top:0">Baja el nivel si...</h4>
+    <p style="font-size:12.5px;color:#1c1c1c">Una encuesta adicional mide su desempeño específico en escenario general frente a Quiroz (dato hoy no disponible) y resulta competitivo · la dirigencia nacional confirma explícitamente que el género será un criterio de peso en la definición de septiembre · se consolida como coordinadora o en un rol de primer nivel en el gobierno entrante, sea cual sea el resultado final.</p></div>
+  </div>
+  `;
+}
+
+// ===================== 9. TERRITORIAL =====================
+function renderTerritorial(){
+  const el = document.getElementById('territorial');
+  const rows = [
+    ["Morelia (colonia Pino Suárez)","Gladyz Butanda","Asamblea informativa: \"la transformación se defiende desde las calles\" (24 ago)"],
+    ["Zacapu","Gladyz Butanda","Movilización de \"ejército guinda\" en defensa de la 4T"],
+    ["Morelia (evento institucional)","Fabiola Alanís","Presentación de mensaje de unidad territorial en torno al Plan Michoacán (25 ago)"],
+    ["Michoacán (7 regiones, estructura PT)","Raúl Morón","Respaldo formal y simultáneo del PT desde sus 7 regiones estatales (25 ago)"],
+    ["Uruapan y región","Vacío persistente de MORENA — Grecia Quiroz (externa)","Tercer corte consecutivo sin actividad de alto perfil de ningún aspirante de MORENA; ahora con MC formalmente sumado al proyecto de Quiroz"],
+  ];
+  el.innerHTML = `
+  <h2 class="sec">Segmentación Territorial</h2>
+  <p class="lead">Morón compensa su crisis de percepción con la señal de estructura más contundente del periodo (respaldo simultáneo de las 7 regiones del PT). Butanda mantiene el mayor volumen de movilización de calle, sin que esto se traduciere en cifras de encuesta. El vacío de Uruapan se vuelve más costoso: es ahí donde nace el proyecto de Quiroz, hoy en empate técnico con MORENA.</p>
+  <div class="card"><table><thead><tr><th>Región / municipio</th><th>Actor con mayor presencia</th><th>Nota</th></tr></thead>
+  <tbody>${rows.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join('')}</tbody></table></div>
+  <div class="divider"></div>
+  <div class="card"><h4 style="color:#C0392B;margin-top:0">⚠ Vacío estratégico persistente: Uruapan</h4>
+  <p style="font-size:12.5px;color:#1c1c1c">Tercer corte de monitoreo consecutivo sin actividad de alto perfil de ningún aspirante de MORENA en Uruapan. Con Movimiento Ciudadano formalmente sumado al proyecto de Grecia Quiroz (17 ago) y un escenario de empate técnico confirmado (25 ago), este vacío ya no es solo una debilidad interna: es una vulnerabilidad de cara a la elección general de 2027.</p></div>
+  `;
+}
+</script>
+</body>
+</html>
